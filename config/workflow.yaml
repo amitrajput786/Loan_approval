@@ -1,0 +1,52 @@
+workflow:
+  name: loan_approval
+  version: "1.0"
+  idempotency_window_seconds: 86400
+
+stages:
+  - name: schema_validation
+    type: validation
+    on_failure: reject
+
+  - name: eligibility_check
+    type: rules
+    on_failure: reject
+
+  - name: credit_check
+    type: external
+    service: credit_bureau
+    retries: 3
+    retry_delay_seconds: 1
+    on_failure: manual_review
+
+  - name: risk_assessment
+    type: rules
+    on_failure: manual_review
+
+  - name: final_decision
+    type: decision
+
+rules:
+  eligibility:
+    min_age: 18
+    max_age: 75
+    min_annual_income: 200000
+    min_employment_months: 6
+
+  risk:
+    credit_score:
+      approve_above: 700
+      manual_review_above: 600
+      reject_below: 600
+    debt_to_income_ratio:
+      max_approve: 0.40
+      max_manual_review: 0.55
+    loan_to_income_ratio:
+      max_approve: 5.0
+      max_manual_review: 8.0
+
+  loan:
+    min_amount: 10000
+    max_amount: 5000000
+    min_tenure_months: 6
+    max_tenure_months: 360

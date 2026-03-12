@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LoanFlow — Intelligent Loan Approval</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy: #0a1628;
+    --navy2: #112240;
+    --gold: #c9a84c;
+    --gold2: #e8c97a;
+    --green: #1db87a;
+    --red: #e05252;
+    --amber: #f0a500;
+    --text: #e8e4da;
+    --muted: #8892a4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    background-image: radial-gradient(ellipse at 20% 50%, #112240 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, #0d1f3c 0%, transparent 50%);
+  }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 48px;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 40px; height: 40px; background: var(--gold);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--gold); }
+  .nav-links { display: flex; gap: 24px; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+
+  .hero { text-align: center; padding: 64px 48px 40px; }
+  .hero-badge {
+    display: inline-block; background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.3); border-radius: 20px;
+    padding: 6px 16px; font-size: 12px; color: var(--gold); letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 5vw, 60px); font-weight: 900; line-height: 1.1; margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 0%, var(--gold2) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero p { color: var(--muted); font-size: 16px; max-width: 500px; margin: 0 auto 40px; line-height: 1.6; }
+
+  .stats-bar {
+    display: flex; background: var(--navy2);
+    border: 1px solid rgba(201,168,76,0.15); border-radius: 16px;
+    padding: 20px 48px; justify-content: space-around;
+    margin: 0 48px 32px;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--gold); }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  .main { display: grid; grid-template-columns: 1fr 420px; gap: 32px; padding: 0 48px 64px; max-width: 1200px; margin: 0 auto; }
+
+  .form-card {
+    background: var(--navy2); border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 20px; padding: 36px; position: relative; overflow: hidden;
+  }
+  .form-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold2), var(--gold));
+  }
+  .form-card h2 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 28px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-group input, .form-group select {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 12px 16px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    transition: border-color 0.2s, background 0.2s; outline: none;
+  }
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--gold); background: rgba(201,168,76,0.06);
+  }
+  .form-group select option { background: var(--navy2); }
+  .form-group input::placeholder { color: var(--muted); font-size: 13px; }
+
+  .submit-btn {
+    width: 100%; margin-top: 24px; padding: 16px;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 600; color: var(--navy); cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201,168,76,0.3); }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .right-panel { display: flex; flex-direction: column; gap: 20px; }
+
+  .result-card {
+    background: var(--navy2); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px; padding: 28px; min-height: 200px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+  }
+  .result-card.approved { border-color: rgba(29,184,122,0.4); background: rgba(29,184,122,0.06); }
+  .result-card.rejected { border-color: rgba(224,82,82,0.4); background: rgba(224,82,82,0.06); }
+  .result-card.manual_review { border-color: rgba(240,165,0,0.4); background: rgba(240,165,0,0.06); }
+
+  .result-icon { font-size: 48px; margin-bottom: 12px; }
+  .result-status { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .result-status.approved { color: var(--green); }
+  .result-status.rejected { color: var(--red); }
+  .result-status.manual_review { color: var(--amber); }
+  .result-msg { color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+  .metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .metric {
+    background: var(--navy2); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px; padding: 14px; text-align: center;
+  }
+  .metric-val { font-size: 20px; font-weight: 700; color: var(--gold); }
+  .metric-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+  .rules-card {
+    background: var(--navy2); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px; padding: 20px;
+  }
+  .rules-card h3 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .rule-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px; line-height: 1.4;
+  }
+  .rule-item:last-child { border-bottom: none; }
+  .rule-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+  .rule-dot.pass { background: var(--green); }
+  .rule-dot.fail { background: var(--red); }
+  .rule-dot.review { background: var(--amber); }
+
+  .audit-btn {
+    display: block; text-align: center; padding: 12px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; color: var(--muted); text-decoration: none;
+    font-size: 13px; transition: all 0.2s;
+  }
+  .audit-btn:hover { background: rgba(201,168,76,0.08); border-color: var(--gold); color: var(--gold); }
+
+  .idempotent-badge {
+    display: inline-block; background: rgba(201,168,76,0.15);
+    border: 1px solid rgba(201,168,76,0.3); border-radius: 6px;
+    padding: 3px 10px; font-size: 11px; color: var(--gold); margin-top: 8px;
+  }
+
+  .spinner {
+    width: 36px; height: 36px; border: 3px solid rgba(201,168,76,0.2);
+    border-top-color: var(--gold); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+    header, .hero, .main { padding-left: 24px; padding-right: 24px; }
+    .stats-bar { margin: 0 24px 24px; flex-wrap: wrap; gap: 16px; padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🏦</div>
+    <span class="logo-text">LoanFlow</span>
+  </div>
+  <nav class="nav-links">
+    <a href="/docs">API Docs</a>
+    <a href="/applications">All Applications</a>
+    <a href="/health">Health</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div class="hero-badge">⚡ Configurable Workflow Decision Engine</div>
+  <h1>Intelligent Loan<br/>Approval System</h1>
+  <p>Rules-based decisioning with full audit trails, retry logic, and real-time credit assessment</p>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-num">5</div><div class="stat-label">Workflow Stages</div></div>
+  <div class="stat"><div class="stat-num">13</div><div class="stat-label">Rule Checks</div></div>
+  <div class="stat"><div class="stat-num">3×</div><div class="stat-label">Credit Bureau Retries</div></div>
+  <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Audit Coverage</div></div>
+</div>
+
+<div class="main">
+  <div class="form-card">
+    <h2>📋 Submit Loan Application</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Request ID (Idempotency Key)</label>
+        <input type="text" id="request_id" placeholder="REQ-001"/>
+      </div>
+      <div class="form-group">
+        <label>Applicant Full Name</label>
+        <input type="text" id="applicant_name" placeholder="Ravi Kumar"/>
+      </div>
+      <div class="form-group">
+        <label>Age (years)</label>
+        <input type="number" id="age" placeholder="30" min="1" max="120"/>
+      </div>
+      <div class="form-group">
+        <label>PAN Number</label>
+        <input type="text" id="pan_number" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase"/>
+      </div>
+      <div class="form-group">
+        <label>Annual Income (₹)</label>
+        <input type="number" id="annual_income" placeholder="800000"/>
+      </div>
+      <div class="form-group">
+        <label>Employment Duration (months)</label>
+        <input type="number" id="employment_months" placeholder="24"/>
+      </div>
+      <div class="form-group">
+        <label>Loan Amount (₹)</label>
+        <input type="number" id="loan_amount" placeholder="500000"/>
+      </div>
+      <div class="form-group">
+        <label>Tenure (months)</label>
+        <input type="number" id="tenure_months" placeholder="60"/>
+      </div>
+      <div class="form-group full">
+        <label>Loan Purpose</label>
+        <select id="purpose">
+          <option value="home_renovation">Home Renovation</option>
+          <option value="education">Education</option>
+          <option value="medical">Medical Emergency</option>
+          <option value="vehicle">Vehicle Purchase</option>
+          <option value="business">Business Expansion</option>
+          <option value="personal">Personal</option>
+          <option value="wedding">Wedding</option>
+          <option value="travel">Travel</option>
+        </select>
+      </div>
+    </div>
+    <button class="submit-btn" onclick="submitApplication()" id="submitBtn">Submit Application →</button>
+    <div style="margin-top:16px;text-align:center;">
+      <a href="#" onclick="fillDemo();return false;" style="color:var(--gold);font-size:13px;text-decoration:none;">✨ Fill with demo data</a>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="result-card" id="resultCard">
+      <div>
+        <div style="font-size:40px;margin-bottom:12px">📨</div>
+        <div style="font-weight:600;margin-bottom:6px">Awaiting Submission</div>
+        <div style="font-size:13px;color:var(--muted)">Fill the form and click Submit to process your application through the workflow engine</div>
+      </div>
+    </div>
+
+    <div class="metrics" id="metricsRow" style="display:none">
+      <div class="metric"><div class="metric-val" id="m_score">—</div><div class="metric-label">Credit Score</div></div>
+      <div class="metric"><div class="metric-val" id="m_dti">—</div><div class="metric-label">DTI Ratio</div></div>
+      <div class="metric"><div class="metric-val" id="m_lti">—</div><div class="metric-label">LTI Ratio</div></div>
+    </div>
+
+    <div class="rules-card" id="rulesCard" style="display:none">
+      <h3>🔍 Rules Triggered</h3>
+      <div id="rulesList"></div>
+    </div>
+
+    <a href="#" class="audit-btn" id="auditLink" style="display:none">📁 View Full Audit Trail →</a>
+  </div>
+</div>
+
+<script>
+  function fillDemo() {
+    document.getElementById('request_id').value = 'REQ-' + Math.random().toString(36).substr(2,6).toUpperCase();
+    document.getElementById('applicant_name').value = 'Ravi Kumar';
+    document.getElementById('age').value = '30';
+    document.getElementById('pan_number').value = 'ABCDE1234F';
+    document.getElementById('annual_income').value = '800000';
+    document.getElementById('employment_months').value = '24';
+    document.getElementById('loan_amount').value = '500000';
+    document.getElementById('tenure_months').value = '60';
+    document.getElementById('purpose').value = 'home_renovation';
+  }
+
+  async function submitApplication() {
+    const btn = document.getElementById('submitBtn');
+    const resultCard = document.getElementById('resultCard');
+
+    const payload = {
+      request_id: document.getElementById('request_id').value.trim(),
+      applicant_name: document.getElementById('applicant_name').value.trim(),
+      age: parseInt(document.getElementById('age').value),
+      pan_number: document.getElementById('pan_number').value.trim().toUpperCase(),
+      annual_income: parseFloat(document.getElementById('annual_income').value),
+      employment_months: parseInt(document.getElementById('employment_months').value),
+      loan_amount: parseFloat(document.getElementById('loan_amount').value),
+      tenure_months: parseInt(document.getElementById('tenure_months').value),
+      purpose: document.getElementById('purpose').value
+    };
+
+    for (const [k, v] of Object.entries(payload)) {
+      if (!v && v !== 0) {
+        resultCard.className = 'result-card rejected';
+        resultCard.innerHTML = '<div class="result-icon">⚠️</div><div class="result-status rejected">Missing Field</div><div class="result-msg">Please fill in all fields before submitting.</div>';
+        return;
+      }
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    resultCard.className = 'result-card';
+    resultCard.innerHTML = '<div class="spinner"></div><div style="color:var(--muted);font-size:14px">Running workflow pipeline...<br/><small style="font-size:11px;opacity:0.6">Eligibility → Credit Bureau → Risk Assessment</small></div>';
+    document.getElementById('metricsRow').style.display = 'none';
+    document.getElementById('rulesCard').style.display = 'none';
+    document.getElementById('auditLink').style.display = 'none';
+
+    try {
+      const res = await fetch('/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        const detail = data.detail?.[0]?.msg || JSON.stringify(data.detail) || 'Validation error';
+        resultCard.className = 'result-card rejected';
+        resultCard.innerHTML = `<div class="result-icon">❌</div><div class="result-status rejected">Validation Error</div><div class="result-msg">${detail}</div>`;
+        return;
+      }
+
+      const statusMap = {
+        approved:      { icon: '✅', label: 'Approved',       cls: 'approved' },
+        rejected:      { icon: '❌', label: 'Rejected',       cls: 'rejected' },
+        manual_review: { icon: '🔍', label: 'Manual Review',  cls: 'manual_review' }
+      };
+      const s = statusMap[data.status] || { icon: '⏳', label: data.status, cls: '' };
+      const idempotentBadge = data.idempotent ? '<div class="idempotent-badge">♻️ Duplicate request — existing result returned</div>' : '';
+
+      resultCard.className = `result-card ${s.cls}`;
+      resultCard.innerHTML = `
+        <div class="result-icon">${s.icon}</div>
+        <div class="result-status ${s.cls}">${s.label}</div>
+        <div class="result-msg">${data.message}</div>
+        ${idempotentBadge}
+        <div style="margin-top:12px;font-size:11px;color:var(--muted)">ID: ${data.application_id}</div>
+      `;
+
+      if (data.computed_metrics && Object.keys(data.computed_metrics).length > 0) {
+        const m = data.computed_metrics;
+        document.getElementById('m_score').textContent = m.credit_score || '—';
+        document.getElementById('m_dti').textContent = m.dti ? (m.dti * 100).toFixed(1) + '%' : '—';
+        document.getElementById('m_lti').textContent = m.lti ? m.lti.toFixed(2) + 'x' : '—';
+        document.getElementById('metricsRow').style.display = 'grid';
+      }
+
+      if (data.rules_triggered?.length > 0) {
+        document.getElementById('rulesList').innerHTML = data.rules_triggered.map(r => {
+          const cls = r.includes('FAIL') || r.includes('REJECT') ? 'fail' : r.includes('PASS') || r.includes('SUCCESS') ? 'pass' : 'review';
+          return `<div class="rule-item"><div class="rule-dot ${cls}"></div><span>${r}</span></div>`;
+        }).join('');
+        document.getElementById('rulesCard').style.display = 'block';
+      }
+
+      const auditLink = document.getElementById('auditLink');
+      auditLink.href = `/audit?id=${data.application_id}`;
+      auditLink.style.display = 'block';
+
+    } catch (err) {
+      resultCard.className = 'result-card rejected';
+      resultCard.innerHTML = '<div class="result-icon">🔌</div><div class="result-status rejected">Connection Error</div><div class="result-msg">Could not reach the server.</div>';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit Application →';
+    }
+  }
+</script>
+</body>
+</html>

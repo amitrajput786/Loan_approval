@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Audit Report — LoanFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy:#0a1628;--navy2:#112240;--navy3:#162a4a;
+    --gold:#c9a84c;--gold2:#e8c97a;
+    --green:#1db87a;--red:#e05252;--amber:#f0a500;--blue:#4a9eff;
+    --text:#e8e4da;--muted:#8892a4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--navy);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 48px;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+  .logo-icon{width:34px;height:34px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+  .logo-text{font-family:'Playfair Display',serif;font-size:19px;color:var(--gold);}
+  .back-btn{color:var(--muted);text-decoration:none;font-size:13px;padding:7px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;transition:all .2s;}
+  .back-btn:hover{color:var(--gold);border-color:var(--gold);}
+
+  .page{max-width:960px;margin:0 auto;padding:36px 24px 80px;}
+
+  /* STATUS BANNER */
+  .status-banner{border-radius:16px;padding:24px 28px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .status-banner.approved{background:linear-gradient(135deg,rgba(29,184,122,.15),rgba(29,184,122,.05));border:1px solid rgba(29,184,122,.3);}
+  .status-banner.rejected{background:linear-gradient(135deg,rgba(224,82,82,.15),rgba(224,82,82,.05));border:1px solid rgba(224,82,82,.3);}
+  .status-banner.manual_review{background:linear-gradient(135deg,rgba(240,165,0,.15),rgba(240,165,0,.05));border:1px solid rgba(240,165,0,.3);}
+  .banner-left{display:flex;align-items:center;gap:16px;}
+  .banner-icon{font-size:40px;}
+  .banner-title{font-family:'Playfair Display',serif;font-size:22px;}
+  .banner-sub{color:var(--muted);font-size:13px;margin-top:3px;}
+  .banner-right{text-align:right;}
+  .banner-id{font-size:11px;color:var(--muted);font-family:monospace;}
+
+  /* INFO GRID */
+  .info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
+  .info-card{background:var(--navy2);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px 16px;}
+  .info-card label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;}
+  .info-card span{font-size:15px;font-weight:600;}
+
+  /* SECTION */
+  .section{margin-bottom:32px;}
+  .section-head{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .section-head::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06);}
+
+  /* CHART CARDS */
+  .chart-card{background:var(--navy2);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:20px;margin-bottom:16px;overflow:hidden;}
+  .chart-card img{width:100%;border-radius:10px;display:block;}
+  .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+
+  /* TIMELINE */
+  .timeline{position:relative;padding-left:30px;}
+  .timeline::before{content:'';position:absolute;left:9px;top:8px;bottom:8px;width:2px;background:rgba(255,255,255,.06);}
+  .tl-item{position:relative;background:var(--navy2);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px 18px;margin-bottom:10px;}
+  .tl-item:hover{border-color:rgba(201,168,76,.2);}
+  .tl-dot{position:absolute;left:-26px;top:18px;width:13px;height:13px;border-radius:50%;border:2px solid var(--navy);}
+  .tl-dot.s{background:var(--green);box-shadow:0 0 7px rgba(29,184,122,.5);}
+  .tl-dot.f{background:var(--red);box-shadow:0 0 7px rgba(224,82,82,.5);}
+  .tl-dot.m{background:var(--amber);box-shadow:0 0 7px rgba(240,165,0,.5);}
+  .tl-dot.d{background:var(--blue);box-shadow:0 0 7px rgba(74,158,255,.5);}
+  .tl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .tl-stage{font-weight:600;font-size:14px;}
+  .tl-time{font-size:11px;color:var(--muted);}
+  .tl-msg{font-size:12px;color:var(--muted);margin-bottom:8px;}
+  .rules-wrap{display:flex;flex-direction:column;gap:5px;}
+  .rule-chip{display:flex;align-items:center;gap:7px;padding:5px 9px;border-radius:7px;font-size:11px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);}
+  .rule-chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .dot-p{background:var(--green);}
+  .dot-f{background:var(--red);}
+  .dot-r{background:var(--amber);}
+  .dot-i{background:var(--blue);}
+
+  .snap-btn{margin-top:8px;font-size:11px;color:var(--muted);cursor:pointer;background:none;border:none;padding:0;transition:color .2s;}
+  .snap-btn:hover{color:var(--gold);}
+  .snap-box{display:none;margin-top:8px;background:rgba(0,0,0,.3);border-radius:8px;padding:10px;font-size:10px;font-family:monospace;color:var(--muted);white-space:pre-wrap;word-break:break-all;border:1px solid rgba(255,255,255,.05);line-height:1.6;}
+  .snap-box.open{display:block;}
+
+  /* STATE STEPS */
+  .steps{display:flex;flex-direction:column;gap:6px;}
+  .step{display:flex;align-items:center;gap:10px;background:var(--navy2);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 14px;}
+  .step-from{color:var(--muted);font-size:12px;}
+  .step-arrow{color:var(--gold);font-size:14px;}
+  .step-to{font-weight:600;font-size:13px;}
+  .step-time{margin-left:auto;font-size:10px;color:var(--muted);}
+  .step-reason{font-size:11px;color:var(--muted);margin-top:2px;}
+
+  /* LOADING */
+  .loading{text-align:center;padding:80px 20px;color:var(--muted);}
+  .spinner{width:40px;height:40px;border:3px solid rgba(201,168,76,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .chart-loading{text-align:center;padding:30px;color:var(--muted);font-size:13px;}
+
+  @media(max-width:700px){
+    header{padding:14px 18px;}
+    .page{padding:20px 14px 60px;}
+    .info-grid{grid-template-columns:1fr 1fr;}
+    .chart-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <div class="logo-icon">🏦</div>
+    <span class="logo-text">LoanFlow</span>
+  </a>
+  <a href="/" class="back-btn">← New Application</a>
+</header>
+
+<div class="page" id="page">
+  <div class="loading"><div class="spinner"></div>Loading audit report...</div>
+</div>
+
+<script>
+const stageInfo={
+  intake:{icon:'📥',title:'Application Intake'},
+  eligibility_check:{icon:'📋',title:'Eligibility Check'},
+  credit_check:{icon:'🏦',title:'Credit Bureau Check'},
+  risk_assessment:{icon:'⚖️',title:'Risk Assessment'},
+  final_decision:{icon:'🎯',title:'Final Decision'}
+};
+const statusText={approved:'✅ Approved',rejected:'❌ Rejected',manual_review:'🔍 Sent for Manual Review'};
+
+function fmt(iso){return new Date(iso).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function fmtDate(iso){return new Date(iso).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}
+function dotClass(r){
+  if(r.includes('FAIL')||r.includes('REJECT'))return 'dot-f';
+  if(r.includes('PASS')||r.includes('SUCCESS')||r.includes('schema_validated'))return 'dot-p';
+  if(r.includes('MANUAL_REVIEW'))return 'dot-r';
+  return 'dot-i';
+}
+function tlDot(s){
+  if(['success','pass','approved'].includes(s))return 's';
+  if(['fail','rejected'].includes(s))return 'f';
+  if(s==='manual_review')return 'm';
+  return 'd';
+}
+function inr(n){return '₹'+Number(n).toLocaleString('en-IN');}
+
+function toggleSnap(btn){
+  const box=btn.nextElementSibling;
+  box.classList.toggle('open');
+  btn.textContent=box.classList.contains('open')?'▼ Hide raw data':'▶ Show raw data';
+}
+
+function renderPage(data, charts){
+  const trail=data.audit_trail, hist=data.state_history;
+  const finalStatus=hist[hist.length-1]?.to_status||'unknown';
+  const firstAudit=trail[0];
+  const appData=firstAudit?JSON.parse(firstAudit.data_snapshot):{};
+  const createdAt=hist[0]?.created_at;
+  const statusCls=['approved','rejected','manual_review'].includes(finalStatus)?finalStatus:'processing';
+  const bannerIcon={approved:'✅',rejected:'❌',manual_review:'🔍',processing:'⏳'}[statusCls]||'⏳';
+  const bannerColor={approved:'var(--green)',rejected:'var(--red)',manual_review:'var(--amber)',processing:'var(--blue)'}[statusCls];
+
+  let h=`
+  <div class="status-banner ${statusCls}">
+    <div class="banner-left">
+      <div class="banner-icon">${bannerIcon}</div>
+      <div>
+        <div class="banner-title" style="color:${bannerColor}">${statusText[finalStatus]||finalStatus}</div>
+        <div class="banner-sub">${appData.applicant_name||''} · ${appData.purpose||''} · Submitted ${createdAt?fmtDate(createdAt):''}</div>
+      </div>
+    </div>
+    <div class="banner-right">
+      <div class="banner-id">${data.application_id}</div>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card"><label>Loan Amount</label><span>${inr(appData.loan_amount||0)}</span></div>
+    <div class="info-card"><label>Annual Income</label><span>${inr(appData.annual_income||0)}</span></div>
+    <div class="info-card"><label>Tenure</label><span>${appData.tenure_months||'—'} months</span></div>
+    <div class="info-card"><label>Employment</label><span>${appData.employment_months||'—'} months</span></div>
+  </div>`;
+
+  /* ── CHARTS ── */
+  h+=`<div class="section"><div class="section-head">📊 Visual Risk Analysis (Python · Matplotlib)</div>`;
+
+  if(charts.gauge){
+    h+=`<div class="chart-card"><img src="data:image/png;base64,${charts.gauge}" alt="Risk Gauges"/></div>`;
+  }
+
+  if(charts.radar||charts.donut){
+    h+=`<div class="chart-grid">`;
+    if(charts.radar) h+=`<div class="chart-card"><img src="data:image/png;base64,${charts.radar}" alt="Applicant Radar"/></div>`;
+    if(charts.donut) h+=`<div class="chart-card"><img src="data:image/png;base64,${charts.donut}" alt="Decision Donut"/></div>`;
+    h+=`</div>`;
+  }
+
+  if(charts.timeline){
+    h+=`<div class="chart-card"><img src="data:image/png;base64,${charts.timeline}" alt="Workflow Timeline"/></div>`;
+  }
+
+  if(charts.rules){
+    h+=`<div class="chart-card"><img src="data:image/png;base64,${charts.rules}" alt="Rules Breakdown"/></div>`;
+  }
+
+  h+=`</div>`;
+
+  /* ── AUDIT TRAIL ── */
+  h+=`<div class="section"><div class="section-head">🔍 Stage-by-Stage Audit Trail</div><div class="timeline">`;
+  trail.forEach(entry=>{
+    const info=stageInfo[entry.stage]||{icon:'⚙️',title:entry.stage};
+    let rules=[];try{rules=JSON.parse(entry.rules_triggered);}catch(e){}
+    let snap=null;try{const r=JSON.parse(entry.data_snapshot);if(Object.keys(r).length)snap=JSON.stringify(r,null,2);}catch(e){}
+    h+=`<div class="tl-item">
+      <div class="tl-dot ${tlDot(entry.status)}"></div>
+      <div class="tl-head"><div class="tl-stage">${info.icon} ${info.title}</div><div class="tl-time">${fmt(entry.created_at)}</div></div>
+      <div class="tl-msg">${entry.message}</div>
+      ${rules.length?`<div class="rules-wrap">${rules.map(r=>`<div class="rule-chip"><div class="dot ${dotClass(r)}"></div><span>${r}</span></div>`).join('')}</div>`:''}
+      ${snap?`<button class="snap-btn" onclick="toggleSnap(this)">▶ Show raw data</button><div class="snap-box">${snap}</div>`:''}
+    </div>`;
+  });
+  h+=`</div></div>`;
+
+  /* ── STATE TRANSITIONS ── */
+  h+=`<div class="section"><div class="section-head">🔄 State Transition History</div><div class="steps">`;
+  hist.forEach(s=>{
+    h+=`<div class="step">
+      <span class="step-from">${s.from_status||'start'}</span>
+      <span class="step-arrow">→</span>
+      <div><div class="step-to">${s.to_status}</div>${s.reason?`<div class="step-reason">${s.reason}</div>`:''}</div>
+      <span class="step-time">${fmt(s.created_at)}</span>
+    </div>`;
+  });
+  h+=`</div></div>`;
+
+  document.getElementById('page').innerHTML=h;
+}
+
+function getAppId(){
+  const p=new URLSearchParams(window.location.search);
+  if(p.get('id'))return p.get('id');
+  const parts=window.location.pathname.split('/');
+  const idx=parts.indexOf('audit');
+  return idx>0?parts[idx-1]:null;
+}
+
+async function load(){
+  const appId=getAppId();
+  const page=document.getElementById('page');
+  if(!appId){
+    page.innerHTML='<div class="loading"><div>No application ID found. <a href="/" style="color:var(--gold)">Go back</a></div></div>';
+    return;
+  }
+  try{
+    const [auditRes, chartsRes]=await Promise.all([
+      fetch(`/applications/${appId}/audit`),
+      fetch(`/applications/${appId}/charts`)
+    ]);
+    if(!auditRes.ok)throw new Error('Not found');
+    const [auditData, chartsData]=await Promise.all([auditRes.json(), chartsRes.json()]);
+    renderPage(auditData, chartsData);
+  }catch(e){
+    page.innerHTML=`<div class="loading"><div>❌ Could not load report. <a href="/" style="color:var(--gold)">Go back</a></div></div>`;
+  }
+}
+
+load();
+</script>
+</body>
+</html>
